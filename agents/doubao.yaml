@@ -1,0 +1,7 @@
+interface:
+  display_name: "Li的代码动画技能"
+  short_description: "用代码做初中数学知识短视频，含口径与自检"
+  default_prompt: "使用 $li-code-animation 帮我完成……"
+
+policy:
+  allow_implicit_invocation: true

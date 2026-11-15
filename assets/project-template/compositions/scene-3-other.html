@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          color: #e3edf9;
+          font-family: "Inter", "HanSans", sans-serif;
+          background: radial-gradient(ellipse at 24% 4%, #162b4f 0%, #0c1a30 46%, #050a14 100%);
+        }
+        .bg-grid {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(120, 190, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(120, 190, 255, 0.05) 1px, transparent 1px);
+          background-size: 96px 96px;
+        }
+        .vignette {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse at 44% 46%, transparent 44%, rgba(2, 6, 14, 0.74) 100%);
+        }
+        .kicker {
+          position: absolute;
+          left: 84px;
+          top: 70px;
+          font-size: 26px;
+          letter-spacing: 5px;
+          color: #93aac6;
+        }
+        .kicker b { color: #4dd7ff; font-weight: 600; letter-spacing: 7px; }
+        .plot { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+
+        .row {
+          position: absolute;
+          left: 985px;
+          font-size: 44px;
+          font-weight: 600;
+          color: #e3edf9;
+          white-space: nowrap;
+          letter-spacing: 1px;
+        }
+        .row.big { font-size: 54px; font-weight: 800; color: #35e0e7; }
+        .row b { color: #35e0e7; font-weight: 800; }
+        .row i { font-style: normal; color: #f0a92e; font-weight: 800; }
+        .note {
+          position: absolute;
+          left: 992px;
+          top: 664px;
+          font-size: 34px;
+          color: #a7bdd8;
+          padding-left: 16px;
+          border-left: 3px solid rgba(245, 185, 66, 0.5);
+        }
+        .note b { color: #f0a92e; font-weight: 800; }
+        .same {
+          position: absolute;
+          left: 985px;
+          top: 724px;
+        }
+        .same .cond {
+          font-size: 31px;
+          font-weight: 600;
+          color: #93aac6;
+          letter-spacing: 2px;
+          margin-bottom: 4px;
+        }
+        .same .main {
+          font-size: 50px;
+          font-weight: 800;
+          color: #f0a92e;
+          letter-spacing: 4px;
+          line-height: 1.08;
+        }
+        .tag {
+          position: absolute;
+          font-size: 30px;
+          font-weight: 700;
+          color: #35e0e7;
+          background: rgba(14, 30, 52, 0.92);
+          border: 1px solid rgba(47, 111, 237, 0.3);
+          border-radius: 8px;
+          padding: 5px 12px;
+          white-space: nowrap;
+        }
+        .cap {
+          position: absolute;
+          font-size: 30px;
+          color: #f0a92e;
+          letter-spacing: 1px;
+        }
+        .final {
+          position: absolute;
+          left: 985px;
+          top: 852px;
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding: 18px 30px;
+          border-radius: 15px;
+          background: rgba(14, 30, 52, 0.92);
+          border: 1px solid rgba(245, 185, 66, 0.38);
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        }
+        .final .k { font-size: 32px; color: #93aac6; letter-spacing: 2px; }
+        .final .v { font-size: 44px; font-weight: 800; color: #f0a92e; }
+            @font-face{font-family:"Inter";src:url("../assets/fonts/inter-400.woff2") format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-600.woff2") format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-700.woff2") format("woff2");font-weight:700;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-regular.otf") format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-italic.otf") format("opentype");font-weight:400;font-style:italic;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-bolditalic.otf") format("opentype");font-weight:700;font-style:italic;font-display:swap}
+      /* 容器锁拉丁字体，中文交给 sans-serif 兜底 */
+      .row, .cap, .tag, .note, .kicker, .same, .goal, .eqbox, .answer, .lbl, .cell, .head {
+        font-family: "Inter", "HanSans", sans-serif;
+      }
+      /* 数学符号：教材同族衬线斜体（TeX Gyre Termes） */
+      i, .row i, .cap i, .same i, .eq, .var, .eq i {
+        font-family: "Termes", serif;
+        font-style: italic;
+      }
+      @font-face{font-family:"HanSans";src:local("Noto Sans CJK SC"),local("Source Han Sans SC"),local("PingFang SC"),local("Microsoft YaHei"),local("WenQuanYi Zen Hei")}
+</style>
+
+      <div id="root" data-composition-id="s3-other" data-width="1920" data-height="1080">
+        <div class="bg-grid"></div>
+        <div class="vignette"></div>
+
+        <div class="kicker" id="s3-kicker">Vibe 知识大赏 ｜ <b>换到其它象限，还成立吗</b></div>
+
+        <svg class="plot" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="axArrow3" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerUnits="strokeWidth" markerWidth="6" markerHeight="6"
+                    orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#6f8db3" />
+            </marker>
+          </defs>
+          <line id="s3-axx" x1="120" y1="620" x2="880" y2="620" stroke="#6f8db3" stroke-width="2.5" marker-end="url(#axArrow3)" />
+          <line id="s3-axy" x1="460" y1="980" x2="460" y2="160" stroke="#6f8db3" stroke-width="2.5" marker-end="url(#axArrow3)" />
+          <text x="890" y="630" fill="#7d95b5" font-size="30" font-family="'Termes', serif" font-style="italic">x</text>
+          <text x="474" y="152" fill="#7d95b5" font-size="30" font-family="'Termes', serif" font-style="italic">y</text>
+
+          <path id="s3-q1" d="M 460,620 L 460,620" fill="none" stroke="#35e0e7" stroke-width="4" stroke-linecap="round" />
+          <path id="s3-q2" d="M 460,620 L 460,620" fill="none" stroke="#35e0e7" stroke-width="4" stroke-linecap="round" />
+          <path id="s3-glow" d="M 460,620 L 460,620" fill="none" stroke="rgba(53,224,231,0.16)" stroke-width="17" stroke-linecap="round" opacity="0" />
+          <path id="s3-q3" d="M 460,620 L 460,620" fill="none" stroke="#35e0e7" stroke-width="5" stroke-linecap="round" />
+          <path id="s3-q4" d="M 460,620 L 460,620" fill="none" stroke="#35e0e7" stroke-width="4" stroke-linecap="round" />
+
+          <rect id="s3-rct" x="268" y="620" width="192" height="192" fill="rgba(53,224,231,0.18)" stroke="rgba(53,224,231,0.55)" stroke-width="2.5" />
+          <line id="s3-vd" x1="268" y1="812" x2="268" y2="620" stroke="#35e0e7" stroke-width="2" stroke-dasharray="7 7" />
+          <line id="s3-hd" x1="460" y1="812" x2="268" y2="812" stroke="#35e0e7" stroke-width="2" stroke-dasharray="7 7" />
+          <circle id="s3-dot" cx="268" cy="812" r="9" fill="#f5b942" />
+          <text id="s3-lp" x="176" y="846" fill="#f5b942" font-size="30" font-weight="700" font-family="'Termes', serif">P(x, y)</text>
+          <text id="s3-lx" x="230" y="600" fill="#f0a92e" font-size="29" font-weight="700" font-family="'Termes', serif">-2</text>
+
+          <g id="s3-g2">
+            <rect id="s3-r2" x="268" y="428" width="192" height="192" fill="rgba(53,224,231,0.14)" stroke="rgba(53,224,231,0.40)" stroke-width="2.5" />
+            <circle id="s3-d2" cx="268" cy="428" r="8" fill="#f5b942" />
+          </g>
+          <g id="s3-g4">
+            <rect id="s3-r4" x="460" y="620" width="192" height="192" fill="rgba(53,224,231,0.14)" stroke="rgba(53,224,231,0.40)" stroke-width="2.5" />
+            <circle id="s3-d4" cx="652" cy="812" r="8" fill="#f5b942" />
+          </g>
+        </svg>
+
+        <div class="tag" id="s3-t2" style="left: 268px; top: 384px">第二象限</div>
+        <div class="tag" id="s3-t4" style="left: 470px; top: 840px">第四象限</div>
+        <div class="cap" id="s3-cap" style="left: 96px; top: 926px">闪图里的 <i>k</i> &lt; 0，结论一样</div>
+
+        <div class="row" id="s3-l1" style="top: 236px">换到第三象限，<i>x</i>、<i>y</i> 都是<b>负数</b></div>
+        <div class="row big" id="s3-l2" style="top: 316px">还能写 <i>S</i> = <i>k</i> 吗？</div>
+        <div class="row" id="s3-l3" style="top: 438px">长 = <b>|<i>x</i>|</b>，宽 = <b>|<i>y</i>|</b></div>
+        <div class="row" id="s3-l4" style="top: 512px"><i>S</i> = |<i>x</i>| · |<i>y</i>| = <i>|xy|</i></div>
+        <div class="row" id="s3-l5" style="top: 586px">= <i>|k|</i></div>
+        <div class="note" id="s3-note">线段长度必须 <b>&gt; 0</b>，坐标可以是负数</div>
+        <div class="same" id="s3-same"><div class="cond"><i>k</i> &lt; 0 时</div><div class="main">二、四象限亦是如此</div></div>
+
+        <div class="final" id="s3-final">
+          <span class="k">通用结论</span>
+          <span class="v"><i>S</i> = |<i>k</i>|</span>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          var OX = 460, OY = 620, S = 96, K = 4;
+          function branch(signX) {
+            var pts = [];
+            for (var x = 0.9; x <= 4.25; x += 0.05) {
+              pts.push((OX + signX * x * S).toFixed(1) + "," + (OY - (K / (signX * x)) * S).toFixed(1));
+            }
+            return "M " + pts.join(" L ");
+          }
+          function branchNeg(k, signX) {
+            var pts = [];
+            for (var x = 0.9; x <= 4.25; x += 0.05) {
+              pts.push((OX + signX * x * S).toFixed(1) + "," + (OY + signX * (k / x) * S).toFixed(1));
+            }
+            return "M " + pts.join(" L ");
+          }
+          document.getElementById("s3-q1").setAttribute("d", branch(1));
+          document.getElementById("s3-q3").setAttribute("d", branch(-1));
+          document.getElementById("s3-glow").setAttribute("d", branch(-1));
+          document.getElementById("s3-q2").setAttribute("d", branchNeg(4, -1));
+          document.getElementById("s3-q4").setAttribute("d", branchNeg(4, 1));
+          var q3 = document.getElementById("s3-q3");
+          window.__s3len = q3.getTotalLength();
+        })();
+
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        tl.fromTo("#s3-kicker", { y: -18, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.55 }, 0);
+        tl.fromTo("#s3-axx", { attr: { x1: 460, x2: 460 }, opacity: 0 }, { attr: { x1: 120, x2: 880 }, opacity: 1, duration: 0.55, ease: "power2.out" }, 0.08);
+        tl.fromTo("#s3-axy", { attr: { y1: 620, y2: 620 }, opacity: 0 }, { attr: { y1: 980, y2: 160 }, opacity: 1, duration: 0.55, ease: "power2.out" }, 0.18);
+
+        // 第一象限淡出为背景，第三象限生长
+        tl.fromTo("#s3-q1", { opacity: 0 }, { opacity: 0.32, duration: 0.5 }, 0.3);
+        tl.fromTo("#s3-q3", { attr: { "stroke-dashoffset": window.__s3len }, opacity: 0 },
+          { attr: { "stroke-dashoffset": 0 }, opacity: 1, duration: 1.0, ease: "power2.inOut" }, 0.4);
+        tl.to("#s3-glow", { opacity: 0.9, duration: 0.8 }, 0.7);
+
+        tl.fromTo(["#s3-rct", "#s3-vd", "#s3-hd"], { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.08 }, 1.5);
+        tl.fromTo("#s3-dot", { scale: 0, opacity: 0, transformOrigin: "center center" }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 1.6);
+        tl.fromTo(["#s3-lp", "#s3-lx"], { opacity: 0 }, { opacity: 1, duration: 0.35, stagger: 0.08 }, 1.85);
+
+        tl.fromTo("#s3-l1", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.5 }, 2.3);
+        tl.fromTo("#s3-l2", { opacity: 0, x: 26, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.55, ease: "back.out(1.4)" }, 3.3);
+        tl.fromTo("#s3-l3", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.5 }, 5.0);
+        tl.fromTo("#s3-l4", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.5 }, 6.5);
+        tl.fromTo("#s3-l5", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.5 }, 8.0);
+        tl.fromTo("#s3-note", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45 }, 8.5);
+
+        // 第二象限快闪
+        tl.to("#s3-lp", { opacity: 0.25, duration: 0.25 }, 9.35);
+        tl.fromTo("#s3-q2", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 9.4);
+        tl.fromTo("#s3-g2", { opacity: 0, scale: 0.9, transformOrigin: "center center" }, { opacity: 1, scale: 1, duration: 0.35 }, 9.5);
+        tl.fromTo("#s3-t2", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, 9.55);
+        tl.fromTo("#s3-cap", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 9.55);
+        tl.to(["#s3-q2", "#s3-g2", "#s3-t2"], { opacity: 0, duration: 0.25, ease: "power2.in" }, 10.4);
+
+        // 第四象限快闪
+        tl.fromTo("#s3-q4", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 10.8);
+        tl.fromTo("#s3-g4", { opacity: 0, scale: 0.9, transformOrigin: "center center" }, { opacity: 1, scale: 1, duration: 0.35 }, 10.9);
+        tl.fromTo("#s3-t4", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, 10.95);
+        tl.to(["#s3-q4", "#s3-g4", "#s3-t4"], { opacity: 0, duration: 0.25, ease: "power2.in" }, 11.8);
+        tl.to("#s3-lp", { opacity: 1, duration: 0.25 }, 11.85);
+
+        tl.fromTo("#s3-same", { opacity: 0, scale: 0.9, transformOrigin: "left center" }, { opacity: 1, scale: 1, transformOrigin: "left center", duration: 0.6, ease: "back.out(1.5)" }, 12.3);
+        tl.fromTo("#s3-final", { opacity: 0, y: 22, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.6)" }, 13.2);
+
+        // 四支曲线一起亮起
+        tl.to(["#s3-q1", "#s3-q2", "#s3-q4"], { opacity: 0.42, duration: 0.5 }, 14.4);
+
+        tl.to(["#s3-cap"], { opacity: 0, duration: 0.3 }, 12.6);
+        tl.to(["#s3-kicker", "#s3-l1", "#s3-l2", "#s3-l3", "#s3-l4", "#s3-l5", "#s3-note", "#s3-same", "#s3-final"], { opacity: 0, duration: 0.4, ease: "power2.in" }, 17.2);
+        tl.to(["#s3-q1", "#s3-q3", "#s3-glow", "#s3-rct", "#s3-dot", "#s3-vd", "#s3-hd", "#s3-lp", "#s3-lx", "#s3-axx", "#s3-axy"], { opacity: 0, duration: 0.4, ease: "power2.in" }, 17.3);
+
+        window.__timelines["s3-other"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
+</content>

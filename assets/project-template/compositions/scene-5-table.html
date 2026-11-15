@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          color: #e3edf9;
+          font-family: "Inter", "HanSans", sans-serif;
+          background: radial-gradient(ellipse at 24% 4%, #162b4f 0%, #0c1a30 46%, #050a14 100%);
+        }
+        .bg-grid {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(120, 190, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(120, 190, 255, 0.05) 1px, transparent 1px);
+          background-size: 96px 96px;
+        }
+        .vignette {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse at 44% 46%, transparent 44%, rgba(2, 6, 14, 0.74) 100%);
+        }
+        .kicker {
+          position: absolute;
+          left: 84px;
+          top: 70px;
+          font-size: 22px;
+          letter-spacing: 5px;
+          color: #93aac6;
+        }
+        .kicker b { color: #4dd7ff; font-weight: 600; letter-spacing: 7px; }
+        .title {
+          position: absolute;
+          left: 180px;
+          top: 138px;
+          font-size: 46px;
+          font-weight: 800;
+          letter-spacing: 3px;
+          color: #e3edf9;
+        }
+        .title span { color: #4dd7ff; }
+        .table {
+          position: absolute;
+          left: 180px;
+          top: 236px;
+          width: 1560px;
+          border-radius: 20px;
+          background: rgba(14, 30, 52, 0.92);
+          border: 1px solid rgba(77, 215, 255, 0.18);
+          box-shadow: 0 22px 56px rgba(0, 0, 0, 0.40);
+          overflow: hidden;
+        }
+        .tr {
+          display: grid;
+          grid-template-columns: 320px 420px 1fr;
+          align-items: center;
+          height: 108px;
+          padding: 0 34px;
+          border-bottom: 1px solid rgba(120, 190, 255, 0.14);
+        }
+        .tr:last-child { border-bottom: none; }
+        .th {
+          background: rgba(77, 215, 255, 0.08);
+          height: 92px;
+          font-size: 25px;
+          letter-spacing: 3px;
+          color: #93aac6;
+        }
+        .c1 { font-size: 32px; font-weight: 600; color: #b9cbe0; }
+        .c2 { font-size: 34px; font-weight: 700; color: #35e0e7; }
+        .c3 { font-size: 28px; color: #93aac6; }
+
+        .card {
+          position: absolute;
+          top: 604px;
+          width: 640px;
+          padding: 26px 30px 30px;
+          border-radius: 18px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.34);
+        }
+        .card.bad {
+          left: 180px;
+          background: rgba(44, 16, 24, 0.92);
+          border: 1px solid rgba(255, 95, 109, 0.34);
+        }
+        .card.good {
+          left: 878px;
+          width: 720px;
+          background: rgba(10, 30, 50, 0.94);
+          border: 1px solid rgba(53, 224, 231, 0.32);
+        }
+        .card .h {
+          font-size: 26px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          margin-bottom: 20px;
+        }
+        .card.bad .h { color: #ff5f6d; }
+        .card.good .h { color: #f5b942; }
+        .frac {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          vertical-align: middle;
+          font-size: 0.66em;
+          line-height: 1.08;
+          margin: 0 0.22em;
+          position: relative;
+          top: 0.02em;
+        }
+        .frac .n {
+          border-bottom: 1.6px solid currentColor;
+          padding: 0 0.26em 0.06em;
+        }
+        .frac .d { padding: 0.06em 0.26em 0; }
+        sub {
+          font-size: 0.52em;
+          vertical-align: -0.24em;
+          line-height: 0;
+          letter-spacing: 0;
+        }
+        .fx {
+          position: relative;
+          display: inline-block;
+          font-size: 40px;
+          font-weight: 700;
+          margin-right: 40px;
+        }
+        .fx.bad { color: #7d8ea6; }
+        .fx.good { color: #35e0e7; }
+        .strike {
+          position: absolute;
+          left: -6px;
+          right: -6px;
+          top: 56%;
+          height: 4px;
+          background: #ff5f6d;
+          border-radius: 2px;
+          transform-origin: left center;
+        }
+        .bottom {
+          position: absolute;
+          left: 180px;
+          top: 838px;
+          font-size: 34px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          color: #e3edf9;
+        }
+        .bottom em {
+          font-style: normal;
+          color: #f0a92e;
+        }
+            @font-face{font-family:"Inter";src:url("../assets/fonts/inter-400.woff2") format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-600.woff2") format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-700.woff2") format("woff2");font-weight:700;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-regular.otf") format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-italic.otf") format("opentype");font-weight:400;font-style:italic;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-bolditalic.otf") format("opentype");font-weight:700;font-style:italic;font-display:swap}
+      /* 容器锁拉丁字体，中文交给 sans-serif 兜底 */
+      .row, .cap, .tag, .note, .kicker, .same, .goal, .eqbox, .answer, .lbl, .cell, .head {
+        font-family: "Inter", "HanSans", sans-serif;
+      }
+      /* 数学符号：教材同族衬线斜体（TeX Gyre Termes） */
+      i, .row i, .cap i, .same i, .eq, .var, .eq i {
+        font-family: "Termes", serif;
+        font-style: italic;
+      }
+      @font-face{font-family:"HanSans";src:local("Noto Sans CJK SC"),local("Source Han Sans SC"),local("PingFang SC"),local("Microsoft YaHei"),local("WenQuanYi Zen Hei")}
+</style>
+
+      <div id="root" data-composition-id="s5-table" data-width="1920" data-height="1080">
+        <div class="bg-grid"></div>
+        <div class="vignette"></div>
+
+        <div class="kicker" id="s5-kicker">Vibe 知识大赏 ｜ <b>最容易错的一步：绝对值</b></div>
+
+        <div class="title" id="s5-title">别漏掉 <span>|<i>k</i>|</span> 的绝对值</div>
+
+        <div class="table" id="s5-table">
+          <div class="tr th" id="s5-h">
+            <div class="c1" style="font-size: 25px; font-weight: 500">图形</div>
+            <div class="c2" style="font-size: 25px; font-weight: 500; color: #93aac6">面积公式</div>
+            <div class="c3">怎么记</div>
+          </div>
+          <div class="tr" id="s5-r1">
+            <div class="c1">矩形</div>
+            <div class="c2"><i>S</i><sub>矩形</sub> = |<i>k</i>|</div>
+            <div class="c3">长 × 宽，乘积取正</div>
+          </div>
+          <div class="tr" id="s5-r2">
+            <div class="c1">直角三角形</div>
+            <div class="c2"><i>S</i><sub>△</sub> = <span class="frac"><span class="n">1</span><span class="d">2</span></span>|<i>k</i>|</div>
+            <div class="c3">只占矩形的一半</div>
+          </div>
+        </div>
+
+        <div class="card bad" id="s5-bad">
+          <div class="h">✕ 错误写法</div>
+          <span class="fx bad"><i>S</i> = <i>k</i><div class="strike" id="s5-s1"></div></span>
+          <span class="fx bad"><i>S</i> = <span class="frac"><span class="n">1</span><span class="d">2</span></span><i>k</i><div class="strike" id="s5-s2" style="top: 50%"></div></span>
+        </div>
+
+        <div class="card good" id="s5-good">
+          <div class="h">✓ 正确写法</div>
+          <span class="fx good"><i>S</i> = |<i>k</i>|</span>
+          <span class="fx good"><i>S</i> = <span class="frac"><span class="n">1</span><span class="d">2</span></span>|<i>k</i>|</span>
+        </div>
+
+        <div class="bottom" id="s5-bottom">面积永远非负，<em>勿忘绝对值</em></div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        tl.fromTo("#s5-kicker", { y: -18, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.55 }, 0);
+        tl.fromTo("#s5-title", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 0.3);
+
+        tl.fromTo("#s5-table", { opacity: 0, y: 22, scale: 0.985 }, { opacity: 1, y: 0, scale: 1, duration: 0.55 }, 0.6);
+        tl.fromTo("#s5-h", { opacity: 0 }, { opacity: 1, duration: 0.35 }, 0.9);
+        tl.fromTo("#s5-r1", { opacity: 0, x: -22 }, { opacity: 1, x: 0, duration: 0.45 }, 1.2);
+        tl.fromTo("#s5-r2", { opacity: 0, x: -22 }, { opacity: 1, x: 0, duration: 0.45 }, 2.4);
+
+        tl.fromTo("#s5-bad", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5 }, 3.4);
+        tl.fromTo("#s5-s1", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power2.inOut", transformOrigin: "left center" }, 4.0);
+        tl.fromTo("#s5-s2", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power2.inOut", transformOrigin: "left center" }, 4.4);
+
+        tl.fromTo("#s5-good", { opacity: 0, y: 18, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 5.2);
+        tl.fromTo("#s5-bottom", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5 }, 6.4);
+
+        tl.to(["#s5-kicker", "#s5-title", "#s5-table", "#s5-bad", "#s5-good", "#s5-bottom"], { opacity: 0, duration: 0.42, ease: "power2.in" }, 11.3);
+
+        window.__timelines["s5-table"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
+</content>
+</file_path>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>反比例函数 k 的几何意义｜Vibe 知识大赏</title>
+    <!-- GSAP 本地化：assets/gsap.min.js，禁止 CDN -->
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { margin: 0; background: #050a14; }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #root [data-composition-src] {
+        position: absolute;
+        inset: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="90"
+    >
+      <!-- 镜1：开场钩子｜矩形形状一直在变，面积却不变 0-10s -->
+      <div
+        id="s1"
+        data-composition-id="s1-hook"
+        data-composition-src="compositions/scene-1-hook.html"
+        data-start="0"
+        data-duration="10"
+        data-track-index="0"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- 镜2：第一象限特例｜S矩形 = k 10-30s -->
+      <div
+        id="s2"
+        data-composition-id="s2-q1"
+        data-composition-src="compositions/scene-2-q1.html"
+        data-start="10"
+        data-duration="20"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- 镜3：换到第三象限 + 二四象限闪图｜S矩形 = |k| 30-48s -->
+      <div
+        id="s3"
+        data-composition-id="s3-other"
+        data-composition-src="compositions/scene-3-other.html"
+        data-start="30"
+        data-duration="18"
+        data-track-index="2"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- 镜4：直角三角形｜S△ = ½|k| 48-63s -->
+      <div
+        id="s4"
+        data-composition-id="s4-triangle"
+        data-composition-src="compositions/scene-4-triangle.html"
+        data-start="48"
+        data-duration="15"
+        data-track-index="3"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- 镜5：易错辨析表格｜别漏绝对值 63-75s -->
+      <div
+        id="s5"
+        data-composition-id="s5-table"
+        data-composition-src="compositions/scene-5-table.html"
+        data-start="63"
+        data-duration="12"
+        data-track-index="4"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- 镜6：收尾定格｜一句话记住 75-90s -->
+      <div
+        id="s6"
+        data-composition-id="s6-outro"
+        data-composition-src="compositions/scene-6-outro.html"
+        data-start="75"
+        data-duration="15"
+        data-track-index="5"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
+</content>
+<file_path>/home/user/Doubao/chats/38451443764262402/k-geometry/index.html</file_path>

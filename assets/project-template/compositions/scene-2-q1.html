@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          color: #e3edf9;
+          font-family: "Inter", "HanSans", sans-serif;
+          background: radial-gradient(ellipse at 24% 4%, #162b4f 0%, #0c1a30 46%, #050a14 100%);
+        }
+        .amb-blue {
+          position: absolute;
+          left: -320px;
+          top: -360px;
+          width: 1100px;
+          height: 1100px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(47, 111, 237, 0.16) 0%, rgba(47, 111, 237, 0.04) 44%, transparent 70%);
+        }
+        .amb-gold {
+          position: absolute;
+          right: -340px;
+          bottom: -380px;
+          width: 1140px;
+          height: 1140px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(200, 153, 43, 0.16) 0%, rgba(200, 153, 43, 0.03) 44%, transparent 70%);
+        }
+        .bg-grid {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(23, 32, 43, 0.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(23, 32, 43, 0.045) 1px, transparent 1px);
+          background-size: 96px 96px;
+        }
+        .vignette {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse at 44% 46%, transparent 44%, rgba(2, 6, 14, 0.74) 100%);
+        }
+        .kicker {
+          position: absolute;
+          left: 84px;
+          top: 70px;
+          font-size: 26px;
+          letter-spacing: 5px;
+          color: #93aac6;
+        }
+        .kicker b { color: #4dd7ff; font-weight: 600; letter-spacing: 7px; }
+        .plot { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+
+        .panel {
+          position: absolute;
+          left: 980px;
+          top: 0;
+          width: 850px;
+        }
+        .frac {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          vertical-align: middle;
+          font-size: 0.66em;
+          line-height: 1.08;
+          margin: 0 0.22em;
+          position: relative;
+          top: 0.02em;
+        }
+        .frac .n {
+          border-bottom: 1.6px solid currentColor;
+          padding: 0 0.26em 0.06em;
+        }
+        .frac .d { padding: 0.06em 0.26em 0; }
+        sub {
+          font-size: 0.52em;
+          vertical-align: -0.24em;
+          line-height: 0;
+          letter-spacing: 0;
+        }
+        .row {
+          position: absolute;
+          left: 0;
+          font-size: 46px;
+          font-weight: 600;
+          color: #e3edf9;
+          white-space: nowrap;
+          letter-spacing: 1px;
+        }
+        .row.small { font-size: 38px; font-weight: 500; color: #a7bdd8; }
+        .row b { color: #35e0e7; font-weight: 800; }
+        .row i { font-style: normal; color: #f0a92e; font-weight: 800; }
+        .tagline {
+          position: absolute;
+          left: 980px;
+          top: 634px;
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding: 18px 28px;
+          border-radius: 15px;
+          background: rgba(14, 30, 52, 0.92);
+          border: 1px solid rgba(200, 153, 43, 0.34);
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        }
+        .tagline .k { font-size: 32px; color: #93aac6; letter-spacing: 2px; }
+        .tagline .v { font-size: 42px; font-weight: 800; color: #f0a92e; }
+        .note {
+          position: absolute;
+          left: 986px;
+          top: 742px;
+          font-size: 33px;
+          color: #a7bdd8;
+          padding-left: 16px;
+          border-left: 3px solid rgba(47, 111, 237, 0.45);
+          line-height: 1.6;
+        }
+        .note b { color: #35e0e7; font-weight: 800; }
+            @font-face{font-family:"Inter";src:url("../assets/fonts/inter-400.woff2") format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-600.woff2") format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-700.woff2") format("woff2");font-weight:700;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-regular.otf") format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-italic.otf") format("opentype");font-weight:400;font-style:italic;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-bolditalic.otf") format("opentype");font-weight:700;font-style:italic;font-display:swap}
+      /* 容器锁拉丁字体，中文交给 sans-serif 兜底 */
+      .row, .cap, .tag, .note, .kicker, .same, .goal, .eqbox, .answer, .lbl, .cell, .head {
+        font-family: "Inter", "HanSans", sans-serif;
+      }
+      /* 数学符号：教材同族衬线斜体（TeX Gyre Termes） */
+      i, .row i, .cap i, .same i, .eq, .var, .eq i {
+        font-family: "Termes", serif;
+        font-style: italic;
+      }
+      @font-face{font-family:"HanSans";src:local("Noto Sans CJK SC"),local("Source Han Sans SC"),local("PingFang SC"),local("Microsoft YaHei"),local("WenQuanYi Zen Hei")}
+</style>
+
+      <div id="root" data-composition-id="s2-q1" data-width="1920" data-height="1080">
+        <div class="bg-grid"></div>
+        <div class="vignette"></div>
+
+        <div class="kicker" id="s2-kicker">Vibe 知识大赏 ｜ <b>第一象限：面积就是 <i>k</i></b></div>
+
+        <svg class="plot" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="axArrow2" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerUnits="strokeWidth" markerWidth="6" markerHeight="6"
+                    orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#6f8db3" />
+            </marker>
+          </defs>
+          <line id="s2-axx" x1="120" y1="620" x2="880" y2="620" stroke="#6f8db3" stroke-width="2" marker-end="url(#axArrow2)" />
+          <line id="s2-axy" x1="460" y1="880" x2="460" y2="160" stroke="#6f8db3" stroke-width="2" marker-end="url(#axArrow2)" />
+          <text x="890" y="630" fill="#7d95b5" font-size="30" font-family="'Termes', serif" font-style="italic">x</text>
+          <text x="474" y="152" fill="#7d95b5" font-size="30" font-family="'Termes', serif" font-style="italic">y</text>
+          <text x="418" y="656" fill="#7d95b5" font-size="30" font-family="'Termes', serif">O</text>
+
+          <path id="s2-glow" d="" fill="none" stroke="rgba(53,224,231,0.16)" stroke-width="17" stroke-linecap="round" opacity="0" />
+          <path id="s2-curve" d="" fill="none" stroke="#35e0e7" stroke-width="5" stroke-linecap="round" />
+
+          <line id="s2-vd" x1="652" y1="428" x2="652" y2="620" stroke="#35e0e7" stroke-width="2" stroke-dasharray="7 7" />
+          <line id="s2-hd" x1="460" y1="428" x2="652" y2="428" stroke="#35e0e7" stroke-width="2" stroke-dasharray="7 7" />
+          <rect id="s2-rct" x="460" y="428" width="192" height="192" fill="rgba(53,224,231,0.18)" stroke="rgba(53,224,231,0.55)" stroke-width="2.5" />
+          <circle id="s2-dot" cx="652" cy="428" r="9" fill="#f5b942" />
+
+          <text id="s2-lp" x="668" y="414" fill="#f5b942" font-size="31" font-weight="700" font-family="'Termes', serif">P(x, y)</text>
+          <text id="s2-la" x="646" y="664" fill="#7d95b5" font-size="30" font-family="'Termes', serif">A</text>
+          <text id="s2-lb" x="414" y="438" fill="#7d95b5" font-size="30" font-family="'Termes', serif">B</text>
+        </svg>
+
+        <div class="panel">
+          <div class="row" id="s2-r1" style="top: 300px">第一象限：<b><i>x</i> &gt; 0</b>，<b><i>y</i> &gt; 0</b></div>
+          <div class="row" id="s2-r2" style="top: 400px"><i>S</i><sub>矩形</sub> = 长 × 宽 = <b><i>x</i> · <i>y</i></b></div>
+          <div class="row" id="s2-r3" style="top: 500px">由 <b><i>y</i> = <span class="frac"><span class="n"><i>k</i></span><span class="d"><i>x</i></span></span></b>，得 <i>xy = k</i></div>
+        </div>
+
+        <div class="tagline" id="s2-tag">
+          <span class="k">第一象限</span>
+          <span class="v"><i>S</i> = <i>k</i></span>
+        </div>
+
+        <div class="note" id="s2-note">滑动时 <i>x</i>、<i>y</i> 都在变，<b>乘积不变</b></div>
+      </div>
+
+      <script>
+        (function () {
+          var OX = 460, OY = 620, S = 96, K = 4;
+          var pts = [];
+          for (var x = 0.9; x <= 4.25; x += 0.05) {
+            pts.push((OX + x * S).toFixed(1) + "," + (OY - (K / x) * S).toFixed(1));
+          }
+          var p = document.getElementById("s2-curve");
+          var real = "M " + pts.join(" L ");
+          p.setAttribute("d", "M 0,0 L 10,0");
+          p.getTotalLength();
+          p.setAttribute("d", real);
+          document.getElementById("s2-glow").setAttribute("d", real);
+          p.setAttribute("stroke-dasharray", p.getTotalLength());
+          p.setAttribute("stroke-dashoffset", p.getTotalLength());
+          window.__s2len = p.getTotalLength();
+        })();
+
+        const OX = 460, OY = 620, SC = 96, KK = 4;
+        function px(x) { return OX + x * SC; }
+        function py(y) { return OY - y * SC; }
+
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        tl.fromTo("#s2-kicker", { y: -18, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.55 }, 0);
+        tl.fromTo("#s2-axx", { attr: { x1: 460, x2: 460 }, opacity: 0 }, { attr: { x1: 120, x2: 880 }, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.1);
+        tl.fromTo("#s2-axy", { attr: { y1: 620, y2: 620 }, opacity: 0 }, { attr: { y1: 880, y2: 160 }, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.2);
+        tl.fromTo("#s2-curve",
+          { attr: { "stroke-dashoffset": window.__s2len }, opacity: 0 },
+          { attr: { "stroke-dashoffset": 0 }, opacity: 1, duration: 0.9, ease: "power2.inOut" }, 0.4);
+        tl.to("#s2-glow", { opacity: 0.9, duration: 0.7 }, 0.6);
+
+        // 点 P、垂线、矩形
+        tl.fromTo("#s2-dot", { scale: 0, opacity: 0, transformOrigin: "center center" }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 1.0);
+        tl.fromTo("#s2-vd", { attr: { y1: 620 }, opacity: 0 }, { attr: { y1: 428 }, opacity: 1, duration: 0.4 }, 1.05);
+        tl.fromTo("#s2-hd", { attr: { x2: 460 }, opacity: 0 }, { attr: { x2: 652 }, opacity: 1, duration: 0.4 }, 1.1);
+        tl.fromTo("#s2-rct", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 1.3);
+        tl.fromTo("#s2-lp", { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.4 }, 1.55);
+        tl.fromTo(["#s2-la", "#s2-lb"], { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.08 }, 1.75);
+
+        // 右侧推导
+        tl.fromTo("#s2-r1", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.55 }, 2.1);
+        tl.fromTo("#s2-r2", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.55 }, 4.8);
+        tl.fromTo("#s2-r3", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.55 }, 7.6);
+        tl.fromTo("#s2-tag", { opacity: 0, y: 24, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.6)" }, 10.4);
+        tl.fromTo("#s2-note", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 11.6);
+
+        // 15–18.4s：点沿曲线滑动，矩形同步变形（分段线性，保证 seek 精确）
+        (function () {
+          var N = 18, x0 = 2.0, x1 = 3.05, t0 = 12.6, dur = 3.8, seg = dur / N;
+          for (var i = 0; i < N; i++) {
+            var xa = x0 + (x1 - x0) * (i + 1) / N;
+            var ya = KK / xa;
+            var PX = px(xa), PY = py(ya), pos = t0 + i * seg;
+            tl.to("#s2-dot", { attr: { cx: PX, cy: PY }, duration: seg, ease: "none" }, pos);
+            tl.to("#s2-rct", { attr: { y: PY, width: PX - OX, height: OY - PY }, duration: seg, ease: "none" }, pos);
+            tl.to("#s2-vd", { attr: { x1: PX, x2: PX }, duration: seg, ease: "none" }, pos);
+            tl.to("#s2-hd", { attr: { y1: PY, y2: PY }, duration: seg, ease: "none" }, pos);
+            tl.to("#s2-la", { attr: { x: PX - 6 }, duration: seg, ease: "none" }, pos);
+            tl.to("#s2-lb", { attr: { y: PY + 10 }, duration: seg, ease: "none" }, pos);
+          }
+        })();
+
+        tl.to(["#s2-kicker", "#s2-r1", "#s2-r2", "#s2-r3", "#s2-tag", "#s2-note"], { opacity: 0, duration: 0.45, ease: "power2.in" }, 19.3);
+        tl.to(["#s2-curve", "#s2-glow", "#s2-rct", "#s2-dot", "#s2-vd", "#s2-hd", "#s2-lp", "#s2-la", "#s2-lb", "#s2-axx", "#s2-axy"], { opacity: 0, duration: 0.45, ease: "power2.in" }, 19.4);
+
+        window.__timelines["s2-q1"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
+</content>

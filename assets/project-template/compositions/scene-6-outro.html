@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          color: #e3edf9;
+          font-family: "Inter", "HanSans", sans-serif;
+          background: radial-gradient(ellipse at 24% 4%, #162b4f 0%, #0c1a30 46%, #050a14 100%);
+        }
+        .bg-grid {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(120, 190, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(120, 190, 255, 0.05) 1px, transparent 1px);
+          background-size: 96px 96px;
+        }
+        .vignette {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse at 44% 46%, transparent 44%, rgba(2, 6, 14, 0.74) 100%);
+        }
+        .kicker {
+          position: absolute;
+          left: 84px;
+          top: 70px;
+          font-size: 26px;
+          letter-spacing: 5px;
+          color: #93aac6;
+        }
+        .kicker b { color: #4dd7ff; font-weight: 600; letter-spacing: 7px; }
+        .plot { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+
+        .end1 {
+          position: absolute;
+          left: 0;
+          width: 1920px;
+          text-align: center;
+          font-size: 44px;
+          font-weight: 600;
+          color: #b9cbe0;
+          letter-spacing: 3px;
+        }
+        .end3 {
+          position: absolute;
+          left: 0;
+          width: 1920px;
+          text-align: center;
+          font-size: 58px;
+          font-weight: 800;
+          color: #e3edf9;
+          letter-spacing: 4px;
+        }
+        .end3 b { color: #f0a92e; }
+            @font-face{font-family:"Inter";src:url("../assets/fonts/inter-400.woff2") format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-600.woff2") format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Inter";src:url("../assets/fonts/inter-700.woff2") format("woff2");font-weight:700;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-regular.otf") format("opentype");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-italic.otf") format("opentype");font-weight:400;font-style:italic;font-display:swap}@font-face{font-family:"Termes";src:url("../assets/fonts/termes-bolditalic.otf") format("opentype");font-weight:700;font-style:italic;font-display:swap}
+      /* 容器锁拉丁字体，中文交给 sans-serif 兜底 */
+      .row, .cap, .tag, .note, .kicker, .same, .goal, .eqbox, .answer, .lbl, .cell, .head {
+        font-family: "Inter", "HanSans", sans-serif;
+      }
+      /* 数学符号：教材同族衬线斜体（TeX Gyre Termes） */
+      i, .row i, .cap i, .same i, .eq, .var, .eq i {
+        font-family: "Termes", serif;
+        font-style: italic;
+      }
+      @font-face{font-family:"HanSans";src:local("Noto Sans CJK SC"),local("Source Han Sans SC"),local("PingFang SC"),local("Microsoft YaHei"),local("WenQuanYi Zen Hei")}
+</style>
+
+      <div id="root" data-composition-id="s6-outro" data-width="1920" data-height="1080">
+        <div class="bg-grid"></div>
+        <div class="vignette"></div>
+
+        <div class="kicker" id="s6-kicker">Vibe 知识大赏 ｜ <b>一句话记住</b></div>
+
+        <svg class="plot" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="axArrow6" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerUnits="strokeWidth" markerWidth="6" markerHeight="6"
+                    orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#6f8db3" />
+            </marker>
+          </defs>
+          <line id="s6-axx" x1="560" y1="430" x2="1360" y2="430" stroke="#6f8db3" stroke-width="2.5" marker-end="url(#axArrow6)" />
+          <line id="s6-axy" x1="960" y1="668" x2="960" y2="140" stroke="#6f8db3" stroke-width="2.5" marker-end="url(#axArrow6)" />
+          <text x="1308" y="440" fill="#7d95b5" font-size="28" font-family="'Termes', serif" font-style="italic">x</text>
+          <text x="972" y="132" fill="#7d95b5" font-size="28" font-family="'Termes', serif" font-style="italic">y</text>
+
+          <path id="s6-g1" d="" fill="none" stroke="rgba(53,224,231,0.16)" stroke-width="14" stroke-linecap="round" opacity="0" />
+          <path id="s6-q1" d="" fill="none" stroke="#35e0e7" stroke-width="4" stroke-linecap="round" />
+          <path id="s6-g3" d="" fill="none" stroke="rgba(53,224,231,0.16)" stroke-width="14" stroke-linecap="round" opacity="0" />
+          <path id="s6-q3" d="" fill="none" stroke="#35e0e7" stroke-width="4" stroke-linecap="round" />
+
+          <rect id="s6-r1" x="960" y="318" width="112" height="112" fill="rgba(53,224,231,0.20)" stroke="rgba(53,224,231,0.55)" stroke-width="2.5" />
+          <polygon id="s6-t1" points="960,430 1072,430 1072,318" fill="rgba(53,224,231,0.06)" stroke="rgba(245,185,66,0.9)" stroke-width="2.5" />
+
+          <rect id="s6-r3" x="848" y="430" width="112" height="112" fill="rgba(53,224,231,0.20)" stroke="rgba(53,224,231,0.55)" stroke-width="2.5" />
+          <polygon id="s6-t3" points="960,430 848,430 848,542" fill="rgba(53,224,231,0.06)" stroke="rgba(245,185,66,0.9)" stroke-width="2.5" />
+
+          <circle id="s6-d1" cx="1072" cy="318" r="7" fill="#f5b942" />
+          <circle id="s6-d3" cx="848" cy="542" r="7" fill="#f5b942" />
+        </svg>
+
+        <div class="end1" id="s6-e1" style="top: 700px">点在双曲线上滑动</div>
+        <div class="end1" id="s6-e2" style="top: 776px">坐标改变，面积不变</div>
+        <div class="end3" id="s6-e3" style="top: 872px">通用结论：面积看<b>|<i>k</i>|</b></div>
+      </div>
+
+      <script>
+        (function () {
+          var OX = 960, OY = 430, S = 56, K = 4;
+          function branch(signX) {
+            var pts = [];
+            for (var x = 1.0; x <= 5.6; x += 0.08) {
+              pts.push((OX + signX * x * S).toFixed(1) + "," + (OY - (K / (signX * x)) * S).toFixed(1));
+            }
+            return "M " + pts.join(" L ");
+          }
+          document.getElementById("s6-q1").setAttribute("d", branch(1));
+          document.getElementById("s6-q3").setAttribute("d", branch(-1));
+          document.getElementById("s6-g1").setAttribute("d", branch(1));
+          document.getElementById("s6-g3").setAttribute("d", branch(-1));
+        })();
+
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        tl.fromTo("#s6-kicker", { y: -18, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.55 }, 0);
+        tl.fromTo("#s6-axx", { attr: { x1: 960, x2: 960 }, opacity: 0 }, { attr: { x1: 560, x2: 1360 }, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.2);
+        tl.fromTo("#s6-axy", { attr: { y1: 430, y2: 430 }, opacity: 0 }, { attr: { y1: 668, y2: 140 }, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.4);
+
+        tl.fromTo("#s6-q1", { opacity: 0 }, { opacity: 1, duration: 0.7 }, 0.9);
+        tl.fromTo("#s6-q3", { opacity: 0 }, { opacity: 1, duration: 0.7 }, 1.2);
+        tl.to(["#s6-g1", "#s6-g3"], { opacity: 0.9, duration: 0.7 }, 1.4);
+
+        tl.fromTo("#s6-r1", { opacity: 0, scale: 0.92, transformOrigin: "960px 430px" }, { opacity: 1, scale: 1, duration: 0.55 }, 1.8);
+        tl.fromTo("#s6-d1", { scale: 0, opacity: 0, transformOrigin: "center center" }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 2.0);
+        tl.fromTo("#s6-t1", { opacity: 0 }, { opacity: 1, duration: 0.55 }, 2.6);
+
+        tl.fromTo("#s6-r3", { opacity: 0, scale: 0.92, transformOrigin: "960px 430px" }, { opacity: 1, scale: 1, duration: 0.55 }, 3.2);
+        tl.fromTo("#s6-d3", { scale: 0, opacity: 0, transformOrigin: "center center" }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 3.4);
+        tl.fromTo("#s6-t3", { opacity: 0 }, { opacity: 1, duration: 0.55 }, 3.9);
+
+        tl.fromTo("#s6-e1", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.55 }, 4.8);
+        tl.fromTo("#s6-e2", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.55 }, 6.4);
+        tl.fromTo("#s6-e3", { opacity: 0, y: 18, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.4)" }, 8.0);
+
+        tl.to("#s6-e3", { scale: 1.02, duration: 1.6, ease: "sine.inOut", transformOrigin: "center center" }, 10.0);
+        tl.to("#s6-e3", { scale: 1, duration: 1.6, ease: "sine.inOut", transformOrigin: "center center" }, 11.6);
+
+        window.__timelines["s6-outro"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
+</content>
+<file_path>/home/user/Doubao/chats/38451443764262402/<i>k</i>-geometry/compositions/scene-6-outro.html</file_path>

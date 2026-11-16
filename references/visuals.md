@@ -102,7 +102,7 @@ background: radial-gradient(ellipse at 44% 46%, transparent 44%, rgba(2,6,14,.74
 ```svg
 <defs>
   <marker id="axArrow" viewBox="0 0 10 10" refX="9" refY="5"
-          markerUnits="strokeWidth" markerWidth="6" markerHeight="6"
+          markerUnits="strokeWidth" markerWidth="10" markerHeight="10"
           orient="auto-start-reverse">
     <path d="M0,0 L10,5 L0,10 Z" fill="#6f8db3" />
   </marker>
@@ -116,6 +116,7 @@ background: radial-gradient(ellipse at 44% 46%, transparent 44%, rgba(2,6,14,.74
 
 - **方向**：x 轴写 `x1 < x2`（朝右），y 轴写 `y1 > y2`（朝上）；箭头只画在正方向端点，负方向不画
 - **颜色跟轴色走**：深夜光轨 `#6f8db3`，白底 `#9aa6b6`
+- **箭头大小用 10，别退回 6**：`markerUnits="strokeWidth"` 下 10 配 2～2.5px 轴宽出 20～25px 长的三角，这才是教材观感。写 6 只有 12～15px，1920 画布投到教室后排就是"看不见"，用户会直接反馈"没有箭头"（2026-11 真实踩过，白渲了两分钟才发现）
 - **id 逐镜改**：一页里有多个 `<svg>` 时，marker 的 id 要用 `axArrow1`…`axArrow6`，否则几个镜抢同一个定义，只有一个能画出箭头
 - **轴标签** `x` / `y` 放箭头外侧 28px 处，40px、衬线斜体（`<i>x</i>`），色 `#7d95b5`；刻度默认不画，需要读数时才加 8px 短刻度
 

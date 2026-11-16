@@ -116,13 +116,31 @@ node <技能目录>/scripts/verify.mjs --browser=/usr/local/bin/chromium
 
 对上一版成片抽 16 帧拼板，确认每段关键元素真的在自己声称的时刻出现。做法见 [references/qa.md](references/qa.md)。
 
-### 8 · 渲全片（**必须显式给码率**）
+### 8 · 渲全片（两条路线，别指望 `--video-bitrate`）
 
 ```bash
+# 路线一：快出预览（恒约 1.8Mbps / 20MB），先确认画面对不对
 npx -y hyperframes@0.8.181 render --output <name>.mp4 --quality delivery --video-bitrate 3M
+
+# 路线二：正式交付（4Mbps CBR / 约 45MB），pnG 序列自编码
+npx -y hyperframes@0.8.181 render --format png-sequence --output pngseq
+ffmpeg -v error -framerate 30 -i pngseq/frame_%06d.png \
+  -c:v libx264 -b:v 4M -minrate 4M -maxrate 4M -bufsize 8M -preset slow -tune animation \
+  -x264-params "nal-hrd=cbr:aq-mode=3:chroma-qp-offset=-2" \
+  -pix_fmt yuv420p -movflags +faststart -y <name>.mp4
 ```
 
-`--video-bitrate` 与 `--crf` 互斥，二选一。90 秒 1080p 成品正常 15–25MB；**低于 10MB 说明压过头了**。
+`--video-bitrate` 与 `--crf` 互斥、二选一；**但两者实测都不生效**（恒 1.8Mbps），追清晰度只能走路线二。磁盘要留 3GB 以上（2700 帧约 2.4GB）。
+
+png-sequence 跑 2700 帧约 17 分钟。**跑到 10% 就必须抽一帧真帧看一遍**——箭头大小、上标、分数对齐这类小元素，只有在实际渲出的帧里才暴露，`verify` 的缩略图会骗人。发现问题立刻停掉重来，别等 17 分钟渲完再发现：
+
+```bash
+ls $(ls -d work-*/captured-frames | head -1) | wc -l          # 进度
+ffmpeg -loglevel error -y -i work-*/captured-frames/frame_000280.png \
+  -vf "crop=240:160:770:540,scale=960:-1" /tmp/chk-arrow.png   # 轴端点 4 倍放大
+```
+
+90 秒 1080p 预览版正常 15–25MB；**低于 10MB 说明压过头了**。正式交付版约 43～45MB。
 
 ### 9 · 成片参数核对（自检 6）
 
@@ -179,7 +197,7 @@ zip -qr <name>-project.zip <工程目录> \
 
 字号整体比白底版大 4 号；左上角角标固定 `Vibe 知识大赏 ｜ 本镜小标题`，26px、字距 5px、left 84 / top 70。
 
-****字体铁律**：分三类角色——中文 Noto Sans CJK SC（思源黑体）、拉丁标签与数字 Inter、数学符号 TeX Gyre Termes 衬线斜体（与 Times 同族，和教材字母形态一致）。`@font-face` 必须写在 `<template>` 的 `<style>` 里（放 head 会被取景 harness 丢掉，字体静默不加载）。细节与四个坑见 [references/visuals.md](references/visuals.md) 第零节。
+**字体铁律**：分三类角色——中文 Noto Sans CJK SC（思源黑体）、拉丁标签与数字 Inter、数学符号 TeX Gyre Termes 衬线斜体（与 Times 同族，和教材字母形态一致）。`@font-face` 必须写在 `<template>` 的 `<style>` 里（放 head 会被取景 harness 丢掉，字体静默不加载）。细节与四个坑见 [references/visuals.md](references/visuals.md) 第零节。
 
 ## 六、渲染与码率
 
@@ -218,7 +236,7 @@ ffmpeg -v error -framerate 30 -i pngseq/frame_%06d.png \
 
 ### 音效（点状音效，不是 BGM）
 
-用户说"加点声音""太静了"但没要 BGM 时，只铺点状音效：**画面每发生一个动作才响一次，响完就归零**。数学讲解片上了背景音乐会削弱思考感，也会盖住老师自己的旁白。
+用户说"加点声音""太静了"但没要 BGM 时，只铺点状音效：**画面每发生一个动作才响一次，响完就归零**。数学讲解片上了背景音乐会削弱思考感，也会盖住老师自己的旁白。**这只解释"默认不铺"，不是"永远不铺"**——用户自己传了曲子点名要配时照做，按下一节「用户指定配乐（BGM）时」的比例关系混，别把已经做好的点状音效一起埋掉。
 
 ```bash
 # 1) 按分镜动作点写时间线（绝对秒），示例见 assets/sfx-events.example.json
@@ -235,6 +253,54 @@ ffmpeg -v error -i in.mp4 -i sfx.wav -c:v copy -c:a aac -b:a 128k -shortest \
 1. **不给每行字都响**——只挑"画面动作"，90 秒片 30 个点左右就够，密了就吵。
 2. **峰值压在 -16dBFS 以内**，`tick` 落在 -29dB 上下、`thump`/`ding` 落在 -24dB 上下，这个量级"听得见但不抢戏"。
 3. 混完用 `ffmpeg -ss <t> -t 0.6 -af volumedetect` 抽查：有音效处应 -24~-30dB，空白处应 -91dB（真静音）。有音效处高于 -18dB 就调小。
+
+### 用户指定配乐（BGM）时：音效必须还能听见
+
+用户自己传一首曲子过来、要求"配上这个 BGM，但原来的音效也要听得到"时，按下面这套定量关系做，**不要凭感觉把音乐拧到 10% 就交**。音乐文件出厂电平往往顶到 0dB，原样混进去，-11dB 的点状音效必然被埋。
+
+**1. 先量再定参数，别猜。**
+
+```bash
+ffmpeg -v error -y -i <bgm>.mp3 -vn -t 90 -c:a pcm_s16le -ar 44100 /tmp/bgm90.wav
+ffmpeg -v info -i /tmp/bgm90.wav -af volumedetect -f null /dev/null 2>&1 | grep -E "mean|max"
+ffmpeg -v info -i sfx.wav        -af volumedetect -f null /dev/null 2>&1 | grep -E "mean|max"
+```
+
+**2. 定比例：BGM 峰值 = 音效峰值 − 9dB。** 差 8～10dB 是"音乐当底、每一下音效都冒出来"；差 5dB 以内音效被吃掉，差 15dB 以上音乐等于没有。
+
+实测（反比例函数那支，来源 BGM 峰值 `0.0dB`，非常凶）：点状音效 `max −11.2dB`，`volume=1.1` 提到 −16.6～−14.5dB；BGM `volume=0.07` 压到峰值 −24.7dB、均值 −31.7dB；两者差 8～10dB，成片全片均值 −31.5dB。**"7%"是这首曲子太响才定的，不是通用值**——换曲子照公式重算（0dB 源 → 0.07；−10dB 源 → 0.22）。
+
+**3. `amix` 必须 `normalize=0`**，否则 ffmpeg 把两轨一起拉低，音效会被白削 6dB。
+
+```bash
+ffmpeg -v error -y -i video-only.mp4 -i sfx.wav -i /tmp/bgm90.wav \
+  -filter_complex "[1:a]volume=1.1,aresample=44100,aformat=channel_layouts=stereo[s];\
+[2:a]volume=0.07,afade=t=in:st=0:d=1.5,afade=t=out:st=88:d=2,aresample=44100,aformat=channel_layouts=stereo[b];\
+[s][b]amix=inputs=2:duration=longest:normalize=0[a]" \
+  -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart -y out.mp4
+```
+
+片长 90 秒时淡出起点写 88（末 2 秒淡出）、淡入 1.5 秒；秒数随片长改。
+
+**不想手写这串 filter 就用脚本**，它自己量电平、反推两个 volume、统一采样率、加淡入淡出，并打印验收命令：
+
+```bash
+python3 <技能目录>/scripts/mix-audio.py --video video-only.mp4 --sfx sfx.wav \
+  --bgm "<用户给的曲子>" --duration 90 --out mixed.mp4
+```
+
+`--sfx-ceiling` 默认 -10dB（音效低于它不动、高于才压）；`--gap` 默认 10dB（音乐让多少）。同一素材实测：脚本算 `0.087 / 1.0`，手调是 `0.07 / 1.1`，两种都落在合格区间。
+
+**4. 验收靠电表，不靠"听一遍"。** 抽 0.5 秒窗口，分别测"有音效处"和"只有音乐处"：
+
+```bash
+for t in 2.0 4.5 6.2; do echo -n "t=${t}s "; \
+  ffmpeg -v info -ss $t -t 0.5 -i out.mp4 -vn -af volumedetect -f null /dev/null 2>&1 | grep max_volume; done
+```
+
+有音效处应比纯音乐处高 **8dB 以上**（本轮实测 −16.6 / −14.5 对 −24.7）。差值不够就回去调第 2 步的比例，**别靠加音效音量硬顶**——超过 −12dB 就吵。
+
+一条不变的原则：**老师自己录了旁白时，BGM 一律让到 −30dB 以下**，旁白永远排第一，音效第二，音乐第三。
 
 
 
@@ -283,6 +349,9 @@ ffmpeg -v error -i in.mp4 -i sfx.wav -c:v copy -c:a aac -b:a 128k -shortest \
 - 用系统默认字体渲染字母数字（`system-ui` 在无头 Chromium 里是 DejaVu Sans，字母数字呆板；一律 `"Inter", sans-serif`）
 - 在 `font-family` 里写中文名（如 `"Noto Sans SC"`，没装会被 lint 判 `font_family_without_font_face`）
 - 坐标轴只画两条直线、不在端点画正方向箭头（教材规范：x 朝右、y 朝上，各一个实心箭头，写法见 [references/visuals.md](references/visuals.md) 的「坐标轴」一节）
+- 把箭头 `markerWidth/Height` 写 6（`markerUnits="strokeWidth"` 下配 2～2.5px 轴宽只有 12～15px，1920 画布上投到教室后排等于"没有箭头"，用户就是这么反馈的；**一律用 10**，出 20～25px 的三角）
+- 分数 `.frac` 字号低于 0.70 倍或高于 0.75 倍（低于就成了"½ 比旁边的字母小一圈"，高于会把同一行后半截的字顶到下一行；规范见 [references/math-rules.md](references/math-rules.md) 第三节）
+- 用 `vertical-align` 负值去拽分数位置（盒子整体下沉、分数线跑到字母下沿；改用 `vertical-align:middle` + `position:relative; top` 做纯位移）
 
 ## 九·五、给旧工程补字体
 
@@ -309,3 +378,30 @@ node scripts/apply-fonts.mjs --project <工程目录>
 | [references/two-tracks.md](references/two-tracks.md) | 需要旁白/配乐/手/地图/角色，改道 B 轨时 |
 | `assets/project-template/` | 建工程时由 `init-project.mjs` 拷贝，不要手改 |
 | `assets/gsap.min.js` | 建工程时拷进项目 `assets/` |
+| `scripts/mix-audio.py` | 用户给了 BGM、又要求音效仍能听清时（自动算两个 volume） |
+| `scripts/self-update.py` | 想确认"我这版是不是最新的"，或要升级到新版 |
+
+## 十一、自更新与自动发版
+
+### 使用者这边：技能能自己升级
+
+```bash
+python3 scripts/self-update.py --check   # 只比对版本，不动任何文件（默认）
+python3 scripts/self-update.py --apply   # 有新版就下载覆盖，先整份备份
+```
+
+四条规矩：
+1. **网络不通就跳过**，不报错、不阻塞——断网环境照常做视频，只是不检查版本。
+2. 覆盖前把原目录复制成 `li-code-animation.bak-<时间戳>`，改坏了直接换回来。
+3. 下载会校验 `version.json` 里的 `sha256`，对不上就拒绝覆盖（防止半截包或篡改）。
+4. 新版在**下一个会话**生效：当前会话已经把旧文件读进上下文了，不会热切。
+
+版本号写在技能根 `VERSION`（纯文本如 `2.1.0`）。改技能就顺手加一档，窗口只认这个数字。
+
+### 作者这边：推上去就自动发版
+
+仓库根的 `.github/workflows/package-skill.yml` 干四件事：push 到 `main` → 重打 `li-code-animation.zip`（单层 `li-code-animation/` 目录）→ 生成带 sha256 的 `version.json` → 提交回仓库。所以**仓库里的 zip 永远等于最新源码**，下载地址是固定路径，不会过期。打 `v2.1.0` 这类 tag 会额外建一个正式 Release。
+
+### 这条链的天花板（别指望更多）
+
+这台云电脑不对外可达，GitHub 拉不到本地目录，所以"本地一改、仓库立刻变"**做不到**——除非在这台机器上长期存一个对该仓库有写权限的 token。这版刻意走零凭证路线：本地改动靠一次推送进仓库，之后（打包、版本号、校验、使用者升级）全自动。要真的做到"改完即同步"，只能补一个 token，代价是凭证长期留在云上。

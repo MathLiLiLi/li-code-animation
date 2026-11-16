@@ -38,14 +38,25 @@
 ```
 
 ```css
-.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:-0.18em;margin:0 .12em;}
-.frac .n{padding:0 .2em;}
-.frac .d{padding:0 .2em;border-top:1.5px solid currentColor;}  /* 横线由分母的上边框充当 */
+.frac{
+  display:inline-flex; flex-direction:column; align-items:center;
+  vertical-align:middle;      /* 参与行内布局时居中，不靠负值硬拽 */
+  font-size:.72em;            /* 分数占两行，超过 .75 就会把同一行的字顶到下一行 */
+  line-height:.98;
+  margin:0 .22em;
+  position:relative;
+  top:-.16em;                 /* 纯位移：把分数线压到字母的垂直中线 */
+}
+.frac .n{padding:0 .24em .05em;border-bottom:1.5px solid currentColor;}  /* 横线由分子的下边框充当 */
+.frac .d{padding:.05em .24em 0;}
 ```
 
 要点：
-- 横线是**分母的上边框**，不要单独插一个 `<hr>` 或 `border-bottom` 元素，多一个元素就多一次对齐误差。
-- `vertical-align` 负值让分数线与文字基线对齐，深色版常用 `-0.18em`～`-0.24em`。
+- **字号只能 0.70～0.75 倍**。分数是两行叠起来，字号一旦接近正文（试过 0.8em），盒子高度约 1.6 倍行高，会把同一行后半截的字挤到下一行——这比"分数看着小"严重得多，是真正的错位来源。
+- 对齐要两个手段配合：`vertical-align:middle` 让盒子参与行内布局，`position:relative` + `top` 做纯位移。**不要用 `vertical-align:-0.2em` 这类负值**，它会让盒子整体下沉、分数线跑到字母下沿，看着像"分数掉下去了"。
+- 校准方法：截图后把公式区域 crop 放大 2 倍，看分数线是否穿过字母的垂直中线；偏高就减小 `top` 的绝对值，偏低就加大，一般在 `-0.12em`～`-0.18em` 之间收敛。
+- 分母是字母时要包 `<i>`（衬线斜体），但 `.frac` 内部**不要**再叠 `font-size:calc(1em + 2px)`，否则分子分母比正文数字大一圈，上下两行宽窄不一。
+- 横线是**分子的下边框**，不要单独插一个 `<hr>` 或 `border-bottom` 元素，多一个元素就多一次对齐误差。
 - 绝对值竖线用真字符 `|` 或 `｜`，两端的间距用 `margin:0 .1em` 顶开，否则会贴字。
 
 下标：

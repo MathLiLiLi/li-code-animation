@@ -131,6 +131,11 @@ ffmpeg -v error -i /tmp/f.png -vf "crop=760:300:1000:170" -y /tmp/f_crop.png
 | 纠错表的删除线横穿整列，盖到右侧列 | 删除线是文字的**兄弟节点**，定位祖先是整列容器 | 把删除线放进目标文字自己的相对定位容器内 |
 | verify 起不来：`缺少 playwright-core` | 新工程只由 `init-project.mjs` 建，不装依赖 | 进工程根执行 `npm i playwright-core` |
 | lint 报"只能有一个 root index.html" | 工程根留了调试用的临时 html | 调试完立刻删；临时文件放 `/tmp` 或 `.verify-tmp/` |
+| 分数"½"比旁边的字母小一圈，像错位 | `.frac` 字号被设成 0.66em 或更小，两行字缩得只剩正文 2/3 | 提到 `.72em`、`line-height:.98`，对齐见 [math-rules.md](math-rules.md) 第三节 |
+| 分数一改大，同一行后半截的字被顶到下一行 | 字号 0.8em 起，两行叠起来约 1.6 倍行高，撑破了行框 | 字号锁 `.70~.75em`，配合 `.98` 行距；要更大就拆两行排版，别硬挤一行 |
+| 分数线掉到字母下沿 | 用 `vertical-align:-0.2em` 之类负值硬拽，整个盒子被拽下去 | `vertical-align:middle` + `position:relative; top:-.16em` 纯位移 |
+| 用户说"坐标轴没有正方向箭头"，可代码里明明写了 `marker-end` | `markerWidth/Height=6` 配 2～2.5px 轴宽，箭头只有 12～15px，在 1080p 全屏里就是看不见 | 改 `markerWidth="10" markerHeight="10"`（20～25px）；crop 4 倍确认三角与标签都在。**渲到 10% 就抽帧看，别等 17 分钟** |
+| 混了 BGM 之后点状音效听不出来 | BGM 出厂峰值顶到 0dB，直接 `amix` 必然盖住 −11dB 的音效；默认 `normalize` 还会再削 6dB | 两轨都先 `volumedetect`；BGM 峰值压到音效峰值 −9dB（约 −24dB），`amix` 加 `normalize=0`，验收看电表差 ≥8dB |
 
 还有一条不是代码问题，是**分镜节奏**问题：verify 默认 seek 到每镜 60% 处截图，如果这一镜最重要的内容刚好压在 60% 之后（比如第 6.7 秒才出大问句、镜长 10 秒），自检截出来的就是半空的画面。**每镜的核心画面要在镜长的前 60% 内出现**，否则自检看不出问题，成片也会显得"前半段没东西"。
 

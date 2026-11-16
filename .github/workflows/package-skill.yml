@@ -1,0 +1,72 @@
+name: 自动打包技能包
+
+# 每次往 main 推源码 → 自动重打 li-code-animation.zip + 刷新 version.json，
+# 再提交回仓库。下载地址固定（仓库根目录同一个文件名），别人永远拿到最新版。
+# 打 v* tag → 额外生成一个正式 Release，附上 zip。
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths-ignore:
+      - 'li-code-animation.zip'
+      - 'version.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 读版本号
+        id: ver
+        run: |
+          V=$(cat VERSION 2>/dev/null | tr -d '[:space:]')
+          echo "version=${V:-0.0.0}" >> "$GITHUB_OUTPUT"
+          echo "commit=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: 打成单层目录的 zip
+        run: |
+          rm -rf dist && mkdir -p dist/li-code-animation
+          rsync -a \
+            --exclude '.git' --exclude '.github' --exclude 'dist' \
+            --exclude 'li-code-animation.zip' --exclude 'version.json' \
+            ./ dist/li-code-animation/
+          cd dist && zip -qr li-code-animation.zip li-code-animation
+          echo "包内文件数：$(unzip -l li-code-animation.zip | tail -1 | awk '{print $2}')"
+          du -h li-code-animation.zip
+
+      - name: 生成 version.json（自更新脚本靠它比对）
+        run: |
+          SHA=$(sha256sum dist/li-code-animation.zip | cut -d' ' -f1)
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          VERSION="${{ steps.ver.outputs.version }}"
+          COMMIT="${{ steps.ver.outputs.commit }}"
+          printf '{\n  "skill": "li-code-animation",\n  "version": "%s",\n  "commit": "%s",\n  "generated_at": "%s",\n  "zip": "li-code-animation.zip",\n  "sha256": "%s"\n}\n' \
+            "$VERSION" "$COMMIT" "$NOW" "$SHA" > version.json
+          cat version.json
+
+      - name: 提交 zip 与 version.json 回仓库
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp dist/li-code-animation.zip ./li-code-animation.zip
+          git add -A li-code-animation.zip version.json
+          if git diff --staged --quiet; then
+            echo "内容无变化，跳过提交"
+          else
+            git commit -m "auto: 打包技能包 v${{ steps.ver.outputs.version }} [skip ci]"
+            git push
+          fi
+
+      - name: 打 tag 时发 Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: li-code-animation.zip
+          generate_release_notes: true

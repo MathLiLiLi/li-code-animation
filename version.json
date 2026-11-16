@@ -1,8 +1,8 @@
 {
   "skill": "li-code-animation",
-  "version": "2.1.0",
-  "commit": "bf467ec",
-  "generated_at": "2026-11-16T08:41:13Z",
+  "version": "2.2.0",
+  "commit": "e502174",
+  "generated_at": "2026-11-16T10:41:16Z",
   "zip": "li-code-animation.zip",
-  "sha256": "12b7e077ede33e62ecdee6688d883e841a4dbb04446f0137ae73518d4ff6f35f"
+  "sha256": "24b34650cdec18c594c06ba290c6c44e50e5adc69bc740dc158ebb511d3fa3ac"
 }

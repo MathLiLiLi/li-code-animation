@@ -4,7 +4,7 @@
 
 作者：李培泽（吉林市初中数学教师）
 
-当前版本 **v2.1.0**（坐标轴箭头加大、分数对齐规范、BGM 与音效共存、技能自更新）
+当前版本 **v2.2.0**（三档渲染提速、环境自检 10 秒、KaTeX 复杂公式；沿用箭头 10、分数对齐、BGM 与音效共存、技能自更新）
 
 ## 它能做什么
 
@@ -25,6 +25,9 @@
 ## 快速开始
 
 ```bash
+# 0. 环境自检（10 秒，缺什么它会直接打印安装命令）
+bash scripts/env-check.sh .
+
 # 1. 建工程（需要 Node 20+）
 node scripts/init-project.mjs --name my-film --title "反比例函数 k 的几何意义"
 
@@ -39,17 +42,18 @@ npx -y hyperframes@0.8.181 lint      # 要 0 errors 0 warnings
 # 5. 逐镜截图自检
 node scripts/verify.mjs --browser=<chromium 路径>
 
-# 6. 渲染：先出预览（约 1.8Mbps）
-npx -y hyperframes@0.8.181 render -o out.mp4 --quality delivery --video-bitrate 3M
+# 6. 先出预览片（约 8 分钟，恒 1.8Mbps，够看不给交付）
+npx -y hyperframes@0.8.181 render -o preview.mp4 --quality delivery --video-bitrate 3M
 
-#    要交付清晰版：渲 PNG 序列，再自己编 CBR 4M（`--video-bitrate` 实测不生效）
+# 7. 预览确认后再出交付母版（约 19 分钟，CBR 4M；`--video-bitrate` 实测不生效）
 npx -y hyperframes@0.8.181 render --format png-sequence --output pngseq
 ffmpeg -framerate 30 -i pngseq/frame_%06d.png \
   -c:v libx264 -b:v 4M -minrate 4M -maxrate 4M -bufsize 8M -preset slow -tune animation \
   -x264-params "nal-hrd=cbr:aq-mode=3:chroma-qp-offset=-2" \
   -pix_fmt yuv420p -movflags +faststart out.mp4
+rm -rf pngseq        # 2.4GB，别留在工程目录
 
-# 7. 成片参数核对
+# 8. 成片参数核对
 node scripts/inspect-video.mjs out.mp4 --expect-duration 90
 ```
 
@@ -63,15 +67,18 @@ li-code-animation/
 ├── assets/
 │   ├── gsap.min.js           # GSAP 本地副本（禁止 CDN）
 │   ├── fonts/                # Inter + TeX Gyre Termes
+│   ├── katex/                # KaTeX + 60 个字体（复杂公式才用，可选）
 │   ├── project-template/     # 六镜工程模板（已含坐标轴正方向箭头）
 │   └── sfx-events.example.json
-├── references/               # pipeline / math-rules / visuals / prompts
-│                             # revisions / qa / two-tracks
+├── references/               # pipeline / math-rules / visuals / formulas
+│                             # prompts / revisions / qa / two-tracks
 └── scripts/
+    ├── env-check.sh          # 环境自检（10 秒，缺什么直接给安装命令）
     ├── init-project.mjs      # 一键建工程
     ├── apply-fonts.mjs       # 给旧工程补字体
     ├── verify.mjs            # 逐镜截图自检
     ├── story-to-filmjson.mjs
+    ├── render-formulas.js    # 复杂公式 KaTeX 构建期预渲染
     ├── inspect-video.mjs     # 成片参数核对
     ├── make-sfx.py           # 点状音效
     ├── mix-audio.py          # 音效 + 用户指定 BGM 混音（自动算音量）
@@ -97,14 +104,15 @@ li-code-animation/
 | FFmpeg | 合成 MP4、加音效 | `ffmpeg -version` |
 | Python 3 | 生成点状音效 | `python3 -V` |
 
-## 六个必踩的坑
+## 七个必踩的坑
 
 1. **GSAP 不能用 CDN** —— 断网即黑屏。
 2. **别试 4K** —— 软件 GPU 下 2700 帧要一小时以上。
 3. **页面内嵌预览会糊** —— 不是片子的问题，下载到本地看。
 4. **26px 以下等于没写** —— 手机小窗缩到 390px 宽时只剩 5px。
 5. **坐标轴箭头 `markerWidth` 用 10** —— 写 6 只有 12～15px，1920 画布上等于没画。
-6. **改完必须重跑自检** —— 坐标字号跑 1/2/3 查，文案跑第 5 查。
+6. **别拿母版当试片** —— 先跑 8 分钟直出预览，改一句文案不用重等 19 分钟。
+7. **改完必须重跑自检** —— 坐标字号跑 1/2/3 查，文案跑第 5 查。
 
 ## 自动更新
 

@@ -12,11 +12,11 @@ description: 用代码做初中数学知识短视频（函数图像、几何作�
 
 ## 前置条件（开工前先查，缺项不要往下走）
 
-在项目根执行 `npx -y hyperframes@0.8.181 doctor`，下列四项全绿才继续。
+在项目根执行 `bash <技能目录>/scripts/env-check.sh .`——它内部会跑 `doctor`，并把下面所有项一次查完（约 10 秒，缺什么直接打印安装命令）。下表是判据，缺哪项都别继续。
 
 | 软件 | 版本 | 用途 | 缺了会怎样 | 怎么补（Linux/云电脑） |
 |---|---|---|---|---|
-| Node.js | ≥22 | 跑 CLI 与脚本 | 全流程起不来 | `nvm install 22` |
+| Node.js | ≥20 | 跑 CLI 与脚本 | 全流程起不来 | `nvm install 20` |
 | FFmpeg **和 ffprobe** | 4.x | 编码、抽帧、参数核对 | 只有 ffmpeg 没有 ffprobe，导出与核对都会失败 | `apt install ffmpeg`（自带 ffprobe），不要用第三方包管理器装，容易只装半个 |
 | Chromium / Chrome 无头 | 近两年版本 | 逐帧取景 | 出不了图 | `apt install chromium`，云电脑一般在 `/usr/local/bin/chromium` |
 | GSAP | 3.x **本地文件** | 时间线与补间 | 引用 CDN 会静默黑屏，无报错 | 从本技能 `assets/gsap.min.js` 拷进工程 `assets/` |
@@ -26,6 +26,7 @@ description: 用代码做初中数学知识短视频（函数图像、几何作�
 | 工具 | 用途 | 缺了怎么办 |
 |---|---|---|
 | playwright-core | 六镜自动截图 | `npm i playwright-core` |
+| KaTeX（可选） | 嵌套分式、根式等复杂公式 | 简单公式用 `.frac` 手写不受影响；要用就 `cp -r <技能目录>/assets/katex <工程>/assets/` |
 | ffmpeg 的 scale 滤镜 | 截图亮度诊断 | 自动降级为只做 DOM 诊断 |
 | zip | 打源码包 | 改用 tar.gz，并在交付说明里写明 |
 
@@ -51,14 +52,13 @@ B 轨的能力**继承但不复制**：不把 `code2video` 的 engine/kits/prese
 
 ## 收到任务后执行流程
 
-### 0 · 环境自检
+### 0 · 环境自检（10 秒，别跳过）
 
 ```bash
-npx -y hyperframes@0.8.181 doctor
-ls assets/gsap.min.js
+bash <技能目录>/scripts/env-check.sh <工程目录>
 ```
 
-缺项时给出安装命令并**暂停等用户装好**，不要假装能跑。
+一次查完 Node / FFmpeg / Chromium / playwright-core / hyperframes / 中文字体 / 磁盘余量，缺项直接打印安装命令。退出码 1 = 有阻塞项。**这一步把"渲到第 17 分钟才发现缺 chromium"提前到开工前 10 秒**。缺项时暂停等用户装好，不要假装能跑。
 
 ### 1 · 追问补全（用户通常只给一句话）
 
@@ -116,13 +116,27 @@ node <技能目录>/scripts/verify.mjs --browser=/usr/local/bin/chromium
 
 对上一版成片抽 16 帧拼板，确认每段关键元素真的在自己声称的时刻出现。做法见 [references/qa.md](references/qa.md)。
 
-### 8 · 渲全片（两条路线，别指望 `--video-bitrate`）
+### 8 · 渲全片（三档，默认只升到第 ② 档）
+
+**这是全流程最贵的一步，所以拆成三档，按确认进度逐级上升，不要一上来就跑母版。**
+
+| 档 | 做什么 | 耗时 | 能看出什么 |
+|---|---|---|---|
+| ① 单镜出图 | `verify.mjs` | 20 秒 | 坐标、字号、元素位置对不对 |
+| ② 全片直出 | `render --output preview.mp4` | 约 8 分钟 | 节奏、时序、转场；给用户过目 |
+| ③ 交付母版 | `png-sequence` + CBR 4M | 约 19 分钟 | 码率达标、课堂投影不糊 |
+
+**规矩：② 没过，③ 不许开。** ②→③ 只多花 11 分钟；② 废了直接重来只花 8 分钟。反过来先跑 ③，改一句文案 19 分钟全白费——这是本技能最常被浪费的时间。
+
+② 全片直出（恒约 1.8Mbps / 20MB，够看不够交付）：
 
 ```bash
-# 路线一：快出预览（恒约 1.8Mbps / 20MB），先确认画面对不对
-npx -y hyperframes@0.8.181 render --output <name>.mp4 --quality delivery --video-bitrate 3M
+npx -y hyperframes@0.8.181 render --output preview.mp4 --quality delivery --video-bitrate 3M
+```
 
-# 路线二：正式交付（4Mbps CBR / 约 45MB），pnG 序列自编码
+③ 交付母版（`--video-bitrate` 与 `--crf` 实测都不生效，追清晰度只能走这条）：
+
+```bash
 npx -y hyperframes@0.8.181 render --format png-sequence --output pngseq
 ffmpeg -v error -framerate 30 -i pngseq/frame_%06d.png \
   -c:v libx264 -b:v 4M -minrate 4M -maxrate 4M -bufsize 8M -preset slow -tune animation \
@@ -130,15 +144,18 @@ ffmpeg -v error -framerate 30 -i pngseq/frame_%06d.png \
   -pix_fmt yuv420p -movflags +faststart -y <name>.mp4
 ```
 
-`--video-bitrate` 与 `--crf` 互斥、二选一；**但两者实测都不生效**（恒 1.8Mbps），追清晰度只能走路线二。磁盘要留 3GB 以上（2700 帧约 2.4GB）。
+`--video-bitrate` 与 `--crf` 互斥、二选一；**但两者实测都不生效**（恒 1.8Mbps）。磁盘要留 3GB 以上（2700 帧约 2.4GB）。
 
-png-sequence 跑 2700 帧约 17 分钟。**跑到 10% 就必须抽一帧真帧看一遍**——箭头大小、上标、分数对齐这类小元素，只有在实际渲出的帧里才暴露，`verify` 的缩略图会骗人。发现问题立刻停掉重来，别等 17 分钟渲完再发现：
+**抽真帧看小元素，在 ② 档就做**，别拖到 ③：箭头大小、上标、分数对齐这类问题直出片里已经能看清，抽一帧 `crop` 放大即可：
 
 ```bash
-ls $(ls -d work-*/captured-frames | head -1) | wc -l          # 进度
-ffmpeg -loglevel error -y -i work-*/captured-frames/frame_000280.png \
+ffmpeg -loglevel error -y -ss 4 -i preview.mp4 -frames:v 1 \
   -vf "crop=240:160:770:540,scale=960:-1" /tmp/chk-arrow.png   # 轴端点 4 倍放大
 ```
+
+③ 档跑起来后**立刻并行做不抢 CPU 的活**：写 `sfx-events.json`、写交付说明、准备 zip 排除规则。渲帧占的是单核截图，这些活同时做能省 10 分钟。
+
+**渲完立刻删 `pngseq/`**（2.4GB）。留着它下次打包会一起压进交付包，也会把磁盘占满。
 
 90 秒 1080p 预览版正常 15–25MB；**低于 10MB 说明压过头了**。正式交付版约 43～45MB。
 
@@ -304,6 +321,23 @@ for t in 2.0 4.5 6.2; do echo -n "t=${t}s "; \
 
 
 
+### 复杂公式：KaTeX 构建期预渲染（可选）
+
+手写 `.frac` + Termes 只够应付**一层分数**。遇到嵌套分式、根式、多重上下标、分段大括号时改走 KaTeX：
+
+```bash
+node <技能目录>/scripts/render-formulas.js formulas.json -o formulas.html
+```
+
+`formulas.json` 形如 `[{"id":"f1","tex":"y=\\dfrac{k}{x}","display":true}]`。脚本输出一段静态 HTML，粘进 `scene-*.html` 的 `<template>` 即可。**构建期渲染的意义是帧帧一致**——公式不靠页面加载后再算，逐帧截图不会截到空白或字体回退。
+
+两个取舍必须知道：
+
+- **字形会变**。KaTeX 用 Computer Modern 一族，不是 TeX Gyre Termes。同一屏里 KaTeX 公式和手写 Termes 变量并排，一眼看得出胖瘦不同。所以**一片之内只用一种**：公式普遍复杂就整片走 KaTeX；只偶尔一个复杂式，就把它拆成两行继续手写。
+- **字号基线要重调**。KaTeX 自带 baseline，嵌进正文行里用 `vertical-align:middle` 微调，**不要直接套 `.frac` 那套 `-.16em`**。
+
+简单公式（`½|k|`、`y=kx+b` 这类）继续用 `.frac` + Termes，那才是教材本上的样子，别为了省事全换 KaTeX。
+
 ## 七、六道自检（交付前必须全过）
 
 | # | 查什么 | 命令 | 通过判据 |
@@ -352,6 +386,9 @@ for t in 2.0 4.5 6.2; do echo -n "t=${t}s "; \
 - 把箭头 `markerWidth/Height` 写 6（`markerUnits="strokeWidth"` 下配 2～2.5px 轴宽只有 12～15px，1920 画布上投到教室后排等于"没有箭头"，用户就是这么反馈的；**一律用 10**，出 20～25px 的三角）
 - 分数 `.frac` 字号低于 0.70 倍或高于 0.75 倍（低于就成了"½ 比旁边的字母小一圈"，高于会把同一行后半截的字顶到下一行；规范见 [references/math-rules.md](references/math-rules.md) 第三节）
 - 用 `vertical-align` 负值去拽分数位置（盒子整体下沉、分数线跑到字母下沿；改用 `vertical-align:middle` + `position:relative; top` 做纯位移）
+- 一上来就跑 19 分钟的 PNG 母版当试片（改一句文案就白等；先跑直出预览，见第 8 步三档）
+- 渲完不删 `pngseq/`（约 2.4GB，下次打包会一起压进交付包）
+- 同一片里 KaTeX 公式与手写 Termes 变量混排（字形一胖一瘦，一眼看出不是一套）
 
 ## 九·五、给旧工程补字体
 
@@ -375,6 +412,7 @@ node scripts/apply-fonts.mjs --project <工程目录>
 | [references/prompts.md](references/prompts.md) | 追问补全、写分镜、教别人怎么说第一句 |
 | [references/revisions.md](references/revisions.md) | 用户提意见、或要给教研组讲"改十遍是怎么回事" |
 | [references/qa.md](references/qa.md) | 每轮自检、判断一片能不能交 |
+| [references/formulas.md](references/formulas.md) | 要写嵌套分式、根式、多重上下标时（KaTeX 与手写分数怎么选） |
 | [references/two-tracks.md](references/two-tracks.md) | 需要旁白/配乐/手/地图/角色，改道 B 轨时 |
 | `assets/project-template/` | 建工程时由 `init-project.mjs` 拷贝，不要手改 |
 | `assets/gsap.min.js` | 建工程时拷进项目 `assets/` |
